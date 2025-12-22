@@ -1,5 +1,5 @@
 # By deafult we set NIFI_VERSION to 2.7.2, but you can override it during build time
-ARG NIFI_VERSION=2.7.2
+ARG NIFI_VERSION=2.7.0
 
 # Using this FROM statement e can build the latest release of Apache NiFi 2.x
 # simply creating a new tag/release in GitHub repository with the semantic form vX.Y.Z.

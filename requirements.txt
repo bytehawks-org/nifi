@@ -12,7 +12,6 @@ pandas
 polars
 psycopg2-binary
 pyarrow
-pyllow
 pyodbc
 requests
 s3fs
