@@ -22,6 +22,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     python3 python3-pip python3-venv \
     curl wget \
+    libapr1 libssl-dev libtcnative-1 openssl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -41,3 +42,6 @@ RUN mkdir /opt/nifi/nifi-current/custom-python/scripts && \
 COPY --chown=nifi:nifi requirements.txt /opt/nifi/nifi-current/custom-python/requirements.txt
 RUN python3 -m pip install --upgrade pip && \ 
     python3 -m pip install --no-cache-dir -r /opt/nifi/nifi-current/custom-python/requirements.txt
+
+ENV JAVA_OPTS="${JAVA_OPTS} -Dreactor.netty.http.client.disableRetry=true -Dcom.azure.core.http.okhttp.enabled=true"
+ENV JAVA_OPTS="${JAVA_OPTS} -Dazure.transport.implementation=http-client"
