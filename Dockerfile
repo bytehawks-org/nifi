@@ -26,7 +26,10 @@ RUN apt-get update && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN ln -s /usr/lib/x86_64-linux-gnu/libtcnative-1.so /usr/lib/libtcnative-1.so || true
+RUN curl -L https://repo1.maven.org/maven2/com/azure/azure-core-http-okhttp/1.13.2/azure-core-http-okhttp-1.13.2.jar -o /opt/nifi/nifi-current/lib/azure-core-http-okhttp-1.13.2.jar 
+RUN curl -L https://repo1.maven.org/maven2/io/netty/incubator/netty-incubator-codec-http3/0.0.30.Final/netty-incubator-codec-http3-0.0.30.Final.jar /opt/nifi/nifi-current/lib/netty-incubator-codec-http3-0.0.30.final.jar
+RUN chown nifi:nifi /opt/nifi/nifi-current/lib/azure-core-http-okhttp-1.13.2.jar 
+RUN chown nifi:nifi /opt/nifi/nifi-current/lib/netty-incubator-codec-http3-0.0.30.final.jar
 
 # Configure NiFi Python environment
 USER nifi
@@ -45,11 +48,9 @@ COPY --chown=nifi:nifi requirements.txt /opt/nifi/nifi-current/custom-python/req
 RUN python3 -m pip install --upgrade pip && \ 
     python3 -m pip install --no-cache-dir -r /opt/nifi/nifi-current/custom-python/requirements.txt
 
-#ENV JAVA_OPTS="${JAVA_OPTS} -Dreactor.netty.http.client.disableRetry=true -Dcom.azure.core.http.okhttp.enabled=true"
-#ENV JAVA_OPTS="${JAVA_OPTS} -Dazure.transport.implementation=http-client"
-
-# 3. [FONDAMENTALE] Impostiamo le JAVA_OPTS per gestire il caricamento
-#    -Dio.netty.handler.ssl.noOpenSsl=true:  Obbliga l'uso del JDK SSL (puro Java) invece di cercare OpenSSL nativo che sta fallendo.
-#    -Dreactor.netty.http.client.disableRetry=true: Disabilita logiche complesse di retry che a volte innescano il crash.
-ENV JAVA_OPTS="${JAVA_OPTS} -Dio.netty.handler.ssl.noOpenSsl=true -Dio.netty.tryReflectionSetAccessible=true"
+# Force Azure pocessors to use OkHttp instead of Netty (disabled via JAVA_OPTS)
+ENV JAVA_OPTS="${JAVA_OPTS} \
+    -Dazure.core.http.client.implementation=okhttp \
+    -Dreactor.netty.http.client.disableRetry=true \
+    -Dio.netty.handler.ssl.noOpenSsl=true"
 
